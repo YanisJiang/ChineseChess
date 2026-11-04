@@ -1,0 +1,8 @@
+---
+description: 加改学棋谱必须先读 study-line-quality Skill
+alwaysApply: true
+---
+
+# 学棋谱质量
+
+加 / 改 / 生成 / 清洗 `src/study/**` 棋谱数据前：**必须 Read** Skill `study-line-quality`；未读禁止写入谱着。细则与用户原话只在该 Skill，此处不复制。

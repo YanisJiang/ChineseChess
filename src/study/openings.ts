@@ -57,57 +57,17 @@ export const OPENING_LINES: StudyLine[] = [
                                           '屏风马基本阵型已立。可转谱续走中局，或重学/换谱。',
                                         ),
                                       },
-                                      {
-                                        uci: 'c6-c5',
-                                        label: '兵3进1',
-                                        benefit: '另一侧挺兵，同样活马。',
-                                        next: end(),
-                                      },
                                     ],
                                   },
                                 },
-                                {
-                                  uci: 'g3-g4',
-                                  label: '兵三进一',
-                                  benefit: '先挺兵争先，再决定进哪一匹马。',
-                                  next: end('变着：先挺兵的节奏。'),
-                                },
                               ],
                             },
-                          },
-                          {
-                            uci: 'g6-g5',
-                            label: '兵7进1',
-                            benefit: '先挺兵再跳马，也可。',
-                            next: end(),
-                          },
-                        ],
-                      },
-                    },
-                    {
-                      uci: 'h0-g2',
-                      label: '马二进三',
-                      benefit: '先出右马，也常见。',
-                      next: {
-                        moves: [
-                          {
-                            uci: 'b9-c7',
-                            main: true,
-                            label: '马2进3',
-                            benefit: '补齐屏风。',
-                            next: end('先跳右马的变例到此。'),
                           },
                         ],
                       },
                     },
                   ],
                 },
-              },
-              {
-                uci: 'b9-c7',
-                label: '马2进3',
-                benefit: '先跳右马，次序不同。',
-                next: end(),
               },
               {
                 uci: 'h7-e7',
@@ -163,12 +123,6 @@ export const OPENING_LINES: StudyLine[] = [
                                   label: '车一进一',
                                   benefit: '右横车启动，顺炮典型节奏。',
                                   next: end('顺炮横车起手完成。'),
-                                },
-                                {
-                                  uci: 'h0-g2',
-                                  label: '马二进三',
-                                  benefit: '先跳右马也稳。',
-                                  next: end(),
                                 },
                               ],
                             },
@@ -285,8 +239,28 @@ export const OPENING_LINES: StudyLine[] = [
                     {
                       uci: 'g0-e2',
                       label: '相三进五',
-                      benefit: '飞相走柔式对兵。',
-                      next: end('对兵飞相变例到此。'),
+                      benefit: '飞相走柔式对兵，保留弹性。',
+                      next: {
+                        moves: [
+                          {
+                            uci: 'h9-g7',
+                            main: true,
+                            label: '马8进7',
+                            benefit: '出马发展。',
+                            next: {
+                              moves: [
+                                {
+                                  uci: 'b0-c2',
+                                  main: true,
+                                  label: '马八进七',
+                                  benefit: '对出马，飞相对兵骨架立住。',
+                                  next: end('仙人指路转飞相对兵入门完成。'),
+                                },
+                              ],
+                            },
+                          },
+                        ],
+                      },
                     },
                   ],
                 },
@@ -294,8 +268,18 @@ export const OPENING_LINES: StudyLine[] = [
               {
                 uci: 'h7-e7',
                 label: '炮8平5',
-                benefit: '黑直接还中炮。',
-                next: end(),
+                benefit: '黑直接还中炮，转入对攻节奏。',
+                next: {
+                  moves: [
+                    {
+                      uci: 'b0-c2',
+                      main: true,
+                      label: '马八进七',
+                      benefit: '出马护中，承接对攻。',
+                      next: end('仙人指路遇还中炮：出马护中完成，可转顺/列炮专谱。'),
+                    },
+                  ],
+                },
               },
             ],
           },
@@ -393,8 +377,18 @@ export const OPENING_LINES: StudyLine[] = [
                     {
                       uci: 'h2-e2',
                       label: '炮二平五',
-                      benefit: '也可转中炮。',
-                      next: end(),
+                      benefit: '转中炮，打开中路攻势。',
+                      next: {
+                        moves: [
+                          {
+                            uci: 'b9-c7',
+                            main: true,
+                            label: '马2进3',
+                            benefit: '出马护中，承接中炮压力（屏风向）。',
+                            next: end('起马转中炮后出马护中完成。'),
+                          },
+                        ],
+                      },
                     },
                   ],
                 },
@@ -662,8 +656,8 @@ export const OPENING_LINES: StudyLine[] = [
               {
                 uci: 'g6-g5',
                 label: '兵7进1',
-                benefit: '同线对挺，见「仙人指路」。',
-                next: end(),
+                benefit: '同线对挺；细变见「仙人指路」谱。',
+                next: end('转指：对称对挺请改学仙人指路。'),
               },
             ],
           },
