@@ -30,9 +30,9 @@ export default function App() {
   const [game] = useState(() => new Game())
   const [tick, setTick] = useState(0)
   const [selected, setSelected] = useState<Square | null>(null)
-  const [mode, setMode] = useState<Mode>('hotseat')
+  const [mode, setMode] = useState<Mode>('ai')
   const [aiSide, setAiSide] = useState<AiSide>('black')
-  const [aiStrength, setAiStrength] = useState<AiStrength>('weak')
+  const [aiStrength, setAiStrength] = useState<AiStrength>('medium')
   const [fenInput, setFenInput] = useState('')
   const [message, setMessage] = useState('')
 
@@ -166,6 +166,7 @@ export default function App() {
                   >
                     <option value="weak">弱</option>
                     <option value="medium">中</option>
+                    <option value="strong">强</option>
                   </select>
                 </label>
               </>
