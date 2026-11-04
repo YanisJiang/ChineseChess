@@ -37,10 +37,10 @@ function assertNodeLegal(
 
 describe('学棋谱合法性', () => {
   it('全部课程着法合法（含中残局 startFen）', () => {
-    expect(listStudyLines('opening').length).toBeGreaterThanOrEqual(15)
-    expect(listStudyLines('middlegame').length).toBeGreaterThanOrEqual(8)
-    expect(listStudyLines('endgame').length).toBeGreaterThanOrEqual(8)
-    expect(STUDY_LINES.length).toBeGreaterThanOrEqual(31)
+    expect(listStudyLines('opening').length).toBeGreaterThanOrEqual(30)
+    expect(listStudyLines('middlegame').length).toBeGreaterThanOrEqual(30)
+    expect(listStudyLines('endgame').length).toBeGreaterThanOrEqual(30)
+    expect(STUDY_LINES.length).toBeGreaterThanOrEqual(90)
     for (const line of STUDY_LINES) {
       assertLineLegal(line)
     }

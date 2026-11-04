@@ -51,15 +51,18 @@ export function pickFenHit(
   preferLineId?: string | null,
 ): FenHit | null {
   if (hits.length === 0) return null
+  // 指定课仍有续着时强制留在该课（避免同 FEN 被更深 ply 的其它课抢走）
+  if (preferLineId) {
+    const preferred = hits.filter(
+      (h) => h.line.id === preferLineId && h.node.moves.length > 0,
+    )
+    if (preferred.length > 0) return pickFenHit(preferred, null)
+  }
   const scored = [...hits].sort((a, b) => {
     const ba = a.node.moves.length
     const bb = b.node.moves.length
     if (bb !== ba) return bb - ba
     if (b.ply !== a.ply) return b.ply - a.ply
-    if (preferLineId) {
-      if (a.line.id === preferLineId && b.line.id !== preferLineId) return -1
-      if (b.line.id === preferLineId && a.line.id !== preferLineId) return 1
-    }
     return a.line.id.localeCompare(b.line.id)
   })
   return scored[0]!

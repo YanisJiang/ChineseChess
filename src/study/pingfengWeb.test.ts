@@ -97,8 +97,8 @@ describe('pingfeng short-line web', () => {
 
   it('网课挂入目录；中残基础课数量仍达标', () => {
     expect(PINGFENG_WEB_LINES.length).toBe(3)
-    expect(listStudyLines('middlegame').length).toBeGreaterThanOrEqual(8)
-    expect(listStudyLines('endgame').length).toBeGreaterThanOrEqual(8)
+    expect(listStudyLines('middlegame').length).toBeGreaterThanOrEqual(30)
+    expect(listStudyLines('endgame').length).toBeGreaterThanOrEqual(30)
     expect(getStudyLine('mid-paoda-zhongbing')).toBeTruthy()
     expect(getStudyLine('end-duima-tingbing')).toBeTruthy()
     expect(getStudyLine('mid-pingfeng-pingchehou')).toBeTruthy()
