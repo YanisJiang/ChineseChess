@@ -73,7 +73,9 @@ export function StudyPanel({
     return (
       <section>
         <h2>学棋 · {PHASE_LABEL[phase]}</h2>
-        <p className="hint">跟谱学习：高亮谱着，侧栏看「好处」；可任走，离谱后可悔棋或回起点。</p>
+        <p className="hint">
+          跟谱学习：高亮谱着；棋盘可直出，点侧栏变招即走该步；离谱后可悔棋或回起点。
+        </p>
         <div className="btn-row">
           <button type="button" onClick={() => setPhase(null)}>
             返回阶段
@@ -139,6 +141,10 @@ export function StudyPanel({
       {onBook && branches.length > 0 ? (
         <>
           <h3>{opponentTurn ? '对方着法' : '你的着法'}</h3>
+          <p className="hint">
+            点变招即走该步
+            {opponentTurn ? '；也可点下方「对方走」按提示落子' : ''}。
+          </p>
           <ul className="study-branches">
             {branches.map((b) => (
               <li key={b.uci}>

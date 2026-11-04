@@ -294,8 +294,18 @@ export const OPENING_LINES: StudyLine[] = [
               {
                 uci: 'h7-e7',
                 label: '炮8平5',
-                benefit: '黑直接还中炮。',
-                next: end(),
+                benefit: '黑直接还中炮，转入对攻节奏。',
+                next: {
+                  moves: [
+                    {
+                      uci: 'b0-c2',
+                      main: true,
+                      label: '马八进七',
+                      benefit: '出马护中，承接对攻。',
+                      next: end('仙人指路遇还中炮：出马护中完成，可转顺/列炮专谱。'),
+                    },
+                  ],
+                },
               },
             ],
           },
@@ -393,8 +403,18 @@ export const OPENING_LINES: StudyLine[] = [
                     {
                       uci: 'h2-e2',
                       label: '炮二平五',
-                      benefit: '也可转中炮。',
-                      next: end(),
+                      benefit: '转中炮，打开中路攻势。',
+                      next: {
+                        moves: [
+                          {
+                            uci: 'b9-c7',
+                            main: true,
+                            label: '马2进3',
+                            benefit: '出马护中，承接中炮压力（屏风向）。',
+                            next: end('起马转中炮后出马护中完成。'),
+                          },
+                        ],
+                      },
                     },
                   ],
                 },
@@ -662,8 +682,8 @@ export const OPENING_LINES: StudyLine[] = [
               {
                 uci: 'g6-g5',
                 label: '兵7进1',
-                benefit: '同线对挺，见「仙人指路」。',
-                next: end(),
+                benefit: '同线对挺；细变见「仙人指路」谱。',
+                next: end('转指：对称对挺请改学仙人指路。'),
               },
             ],
           },

@@ -280,12 +280,6 @@ export const ENDGAME_LINES: StudyLine[] = [
             ],
           },
         },
-        {
-          uci: 'd1-d2',
-          label: '车六进一',
-          benefit: '也可先抬车再攻。',
-          next: end(),
-        },
       ],
     },
   },

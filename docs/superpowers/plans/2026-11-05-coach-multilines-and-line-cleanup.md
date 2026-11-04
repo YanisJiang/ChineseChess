@@ -30,26 +30,25 @@ Skill | writing-plans(本文件) | brainstorming(已完)
 
 **Files:** Modify `src/study/transferIntent.ts`, `src/study/transferIntent.test.ts`
 
-- [ ] 增加 `shouldStayOnCurrentLine` / `resolveTransferLineId`（本谱有续→null；否则 transfer 或 firstCross）
-- [ ] 单测覆盖 ①②
-- [ ] `npm test -- src/study/transferIntent.test.ts`
+- [x] 增加 `shouldStayOnCurrentLine` / `resolveTransferLineId`
+- [x] 单测覆盖 ①②
+- [x] `npm test`（全量 70 绿）
 
 ### Task 2: App 接上新规则 + 侧栏点即走
 
 **Files:** Modify `src/App.tsx`
 
-- [ ] 转谱 effect 用新判定；删「ambiguous 未点选则 return」
-- [ ] `selectCoachCrossEntry`：转谱 + `beginMove`
-- [ ] 文案；一手贴谱不强制 preferredUci
-- [ ] `npm test`
+- [x] 转谱 effect 用新判定；删「ambiguous 未点选则 return」
+- [x] `selectCoachCrossEntry`：转谱 + `beginMove`
+- [x] 文案；一手贴谱不强制 preferredUci
 
 ### Task 3: 清洗 pingfengWeb
 
 **Files:** Modify `src/study/pingfengWeb.ts`, `src/study/pingfengWeb.test.ts`, 标注旧 spec
 
-- [ ] 删 RED/BLACK/DRAW tails 与 continueTail 课
-- [ ] 枢纽去掉无计划下卒主线，保留平炮/边炮短支
-- [ ] 测例去终局三路；断言无 pf-*-尾巴 id
-- [ ] 旧设计文档状态标注
-- [ ] `npm test`；游离 tag
+- [x] 删 RED/BLACK/DRAW tails 与 continueTail 课
+- [x] 枢纽去掉无计划下卒主线，保留平炮/边炮短支
+- [x] 测例去终局三路；断言无 pf-*-尾巴 id
+- [x] 旧设计文档状态标注
+- [x] `npm test`；tag `conv/2026-11-05-coach-multilines-cleanup` → `0bb6419`
 ---
