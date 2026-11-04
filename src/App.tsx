@@ -142,10 +142,8 @@ export default function App() {
   }, [])
 
   useEffect(() => {
-    // 竖屏窄宽，或横屏矮视口（手机横持常 >720px 宽）
-    const mq = window.matchMedia(
-      '(max-width: 720px), (orientation: landscape) and (max-height: 520px) and (max-width: 900px)',
-    )
+    // 仅按窄宽判定手机竖屏布局；不再单独处理横屏
+    const mq = window.matchMedia('(max-width: 720px)')
     const sync = () => setNarrowLayout(mq.matches)
     sync()
     mq.addEventListener('change', sync)
@@ -772,13 +770,91 @@ export default function App() {
 
   return (
     <div className="app">
-      <header className="header">
-        <h1>中国象棋</h1>
-        <p className="status">{statusLine}</p>
-        <p className="msg">{message}</p>
-      </header>
-
-      <main className="main">
+      <div className="desk">
+        <div className="desk-main">
+        <div className="header-bar">
+        <div className="header-main">
+          <h1>中国象棋</h1>
+          <p className="status">{statusLine}</p>
+          <p className="msg">{message}</p>
+        </div>
+          <section className="side-moves">
+            <h2>走子</h2>
+            <ol className="moves header-moves-list">
+              {game.getMoveHistoryCoords().map((c, i) => (
+                <li key={`${c}-${i}`}>
+                  {i % 2 === 0 ? '红' : '黑'} {c}
+                </li>
+              ))}
+            </ol>
+            {mode === 'hotseat' || mode === 'ai' || mode === 'coach' ? (
+              <div className="btn-row header-moves-actions">
+                <button
+                  type="button"
+                  disabled={snap.moveHistory.length === 0}
+                  onClick={() => setExportOpen(true)}
+                >
+                  导出棋谱
+                </button>
+              </div>
+            ) : null}
+          </section>
+          <section className="side-fen">
+            {mode !== 'study' ? (
+              <>
+                <label className="header-fen-label">
+                  局面串
+                  <textarea
+                    className="header-fen-input"
+                    rows={4}
+                    value={fenInput || game.toFen()}
+                    onChange={(e) => setFenInput(e.target.value)}
+                    onFocus={() => setFenInput(game.toFen())}
+                    spellCheck={false}
+                  />
+                </label>
+                <div className="btn-row header-fen-actions">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      navigator.clipboard?.writeText(game.toFen())
+                      setMessage('已复制局面串')
+                    }}
+                  >
+                    复制
+                  </button>
+                  <button
+                    type="button"
+                    disabled={!!anim || thinking}
+                    onClick={() => {
+                      try {
+                        bumpAiGen()
+                        clearAnim()
+                        game.loadFen(fenInput.trim() || game.toFen())
+                        setSelected(null)
+                        setLastCaptureTo(null)
+                        setMessage('已导入局面')
+                        setFenInput('')
+                        refresh()
+                      } catch (e) {
+                        setMessage(e instanceof Error ? e.message : '导入失败')
+                      }
+                    }}
+                  >
+                    导入
+                  </button>
+                </div>
+                <p className="hint header-selected">
+                  {selected !== null
+                    ? `选中：${squareToCoord(selected)}`
+                    : '\u00a0'}
+                </p>
+              </>
+            ) : (
+              <p className="hint">学棋模式不提供局面串导入</p>
+            )}
+          </section>
+        </div>
         <BoardView
           board={viewBoard}
           selected={selected}
@@ -810,6 +886,7 @@ export default function App() {
           onSquareClick={onSquareClick}
           disabled={!!snap.result || !humanTurn}
         />
+        </div>
 
         <aside className="play-strip" aria-label="谱着与着法">
           <div className="play-strip-book">
@@ -972,7 +1049,7 @@ export default function App() {
           </div>
         </aside>
 
-        <aside className="panel">
+        <aside className="side-stack">
           {narrowLayout ? (
             <button
               type="button"
@@ -989,113 +1066,102 @@ export default function App() {
                 : 'panel-body'
             }
           >
-          <div className="panel-top">
-            {mode !== 'study' ? (
-              <section className="panel-fen">
-                <h2>局面串</h2>
-                <textarea
-                  value={fenInput || game.toFen()}
-                  onChange={(e) => setFenInput(e.target.value)}
-                  onFocus={() => setFenInput(game.toFen())}
-                  rows={3}
+          <div className="side-top">
+          <section className="panel-mode">
+              <h2>模式</h2>
+              <label className="row">
+                <input
+                  type="radio"
+                  checked={mode === 'hotseat'}
+                  onChange={() => switchMode('hotseat')}
                 />
-                <div className="btn-row">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      navigator.clipboard?.writeText(game.toFen())
-                      setMessage('已复制局面串')
-                    }}
-                  >
-                    复制
-                  </button>
-                  <button
-                    type="button"
-                    disabled={!!anim || thinking}
-                    onClick={() => {
-                      try {
+                热座双人
+              </label>
+              <label className="row">
+                <input
+                  type="radio"
+                  checked={mode === 'ai'}
+                  onChange={() => switchMode('ai')}
+                />
+                人机
+              </label>
+              <label className="row">
+                <input
+                  type="radio"
+                  checked={mode === 'study'}
+                  onChange={() => switchMode('study')}
+                />
+                学棋
+              </label>
+              <label className="row">
+                <input
+                  type="radio"
+                  checked={mode === 'coach'}
+                  onChange={() => switchMode('coach')}
+                />
+                陪练跟谱
+              </label>
+            </section>
+            <section className="panel-strength">
+              <h2>电脑强度</h2>
+              {mode === 'ai' ? (
+                <>
+                  <label className="row">
+                    电脑执
+                    <select
+                      value={aiSide}
+                      onChange={(e) => {
                         bumpAiGen()
-                        clearAnim()
-                        game.loadFen(fenInput.trim() || game.toFen())
-                        setSelected(null)
-                        setLastCaptureTo(null)
-                        setMessage('已导入局面')
-                        setFenInput('')
-                        refresh()
-                      } catch (e) {
-                        setMessage(e instanceof Error ? e.message : '导入失败')
-                      }
-                    }}
-                  >
-                    导入
-                  </button>
-                </div>
-                {selected !== null ? (
-                  <p className="hint">选中：{squareToCoord(selected)}</p>
-                ) : null}
-              </section>
-            ) : null}
-            <section className="panel-moves">
-              <h2>走子</h2>
-              <ol className="moves panel-dup-moves">
-                {game.getMoveHistoryCoords().map((c, i) => (
-                  <li key={`${c}-${i}`}>
-                    {i % 2 === 0 ? '红' : '黑'} {c}
-                  </li>
-                ))}
-              </ol>
-              {mode === 'hotseat' || mode === 'ai' || mode === 'coach' ? (
-                <div className="btn-row">
-                  <button
-                    type="button"
-                    disabled={snap.moveHistory.length === 0}
-                    onClick={() => setExportOpen(true)}
-                  >
-                    导出棋谱
-                  </button>
-                </div>
-              ) : null}
+                        setAiSide(e.target.value as AiSide)
+                      }}
+                    >
+                      <option value="black">黑</option>
+                      <option value="red">红</option>
+                    </select>
+                  </label>
+                  <label className="row">
+                    难度
+                    <select
+                      value={aiStrength}
+                      onChange={(e) => {
+                        bumpAiGen()
+                        setAiStrength(e.target.value as AiStrength)
+                      }}
+                    >
+                      <option value="weak">弱</option>
+                      <option value="medium">中</option>
+                      <option value="strong">强</option>
+                    </select>
+                  </label>
+                  <label className="row">
+                    <input
+                      type="checkbox"
+                      checked={aiBookHint}
+                      onChange={(e) => {
+                        setAiBookHint(e.target.checked)
+                        setPreferredUci(null)
+                      }}
+                    />
+                    谱着提示
+                  </label>
+                </>
+              ) : mode === 'coach' ? (
+                <p className="hint">
+                  在谱上时电脑只走谱；离谱后若当前局面落在其它课上会按局面转谱，否则改按人机下。
+                </p>
+              ) : (
+                <p className="hint">仅人机可用</p>
+              )}
             </section>
           </div>
 
           <div className="panel-mid">
-          <section>
-            <h2>模式</h2>
-            <label className="row">
-              <input
-                type="radio"
-                checked={mode === 'hotseat'}
-                onChange={() => switchMode('hotseat')}
-              />
-              热座双人
-            </label>
-            <label className="row">
-              <input
-                type="radio"
-                checked={mode === 'ai'}
-                onChange={() => switchMode('ai')}
-              />
-              人机
-            </label>
-            <label className="row">
-              <input
-                type="radio"
-                checked={mode === 'study'}
-                onChange={() => switchMode('study')}
-              />
-              学棋
-            </label>
-            <label className="row">
-              <input
-                type="radio"
-                checked={mode === 'coach'}
-                onChange={() => switchMode('coach')}
-              />
-              陪练跟谱
-            </label>
+          {(mode === 'coach' && !!coachLine) ||
+          (mode === 'ai' && aiBookHint) ? (
+          <section className="panel-mode-extra">
             {mode === 'coach' && coachLine ? (
-              <>
-                <label className="row">
+              <div className="row coach-line-controls">
+                <label className="row coach-side-label">
                   我执
                   <select
                     value={coachSide}
@@ -1115,119 +1181,73 @@ export default function App() {
                     <option value="black">黑</option>
                   </select>
                 </label>
-                <div className="btn-row">
-                  <button type="button" onClick={resetCoachLine}>
-                    回谱起点
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      bumpCoachGen()
-                      bumpAiGen()
-                      clearAnim()
-                      setCoachLineId(null)
-                      setPreferredUci(null)
-                      game.reset()
-                      setSelected(null)
-                      setLastCaptureTo(null)
-                      setMessage('')
-                      refresh()
-                    }}
-                  >
-                    换谱
-                  </button>
-                </div>
-                <p className="hint">
-                  在谱上时电脑只走谱；离谱后若当前局面落在其它课上会按局面转谱，否则改按人机下。
-                </p>
-              </>
+                <button type="button" onClick={resetCoachLine}>
+                  回谱起点
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    bumpCoachGen()
+                    bumpAiGen()
+                    clearAnim()
+                    setCoachLineId(null)
+                    setPreferredUci(null)
+                    game.reset()
+                    setSelected(null)
+                    setLastCaptureTo(null)
+                    setMessage('')
+                    refresh()
+                  }}
+                >
+                  换谱
+                </button>
+              </div>
             ) : null}
-            {mode === 'ai' ? (
+            {mode === 'ai' && aiBookHint ? (
               <>
-                <label className="row">
-                  电脑执
-                  <select
-                    value={aiSide}
-                    onChange={(e) => {
-                      bumpAiGen()
-                      setAiSide(e.target.value as AiSide)
-                    }}
-                  >
-                    <option value="black">黑</option>
-                    <option value="red">红</option>
-                  </select>
-                </label>
-                <label className="row">
-                  难度
-                  <select
-                    value={aiStrength}
-                    onChange={(e) => {
-                      bumpAiGen()
-                      setAiStrength(e.target.value as AiStrength)
-                    }}
-                  >
-                    <option value="weak">弱</option>
-                    <option value="medium">中</option>
-                    <option value="strong">强</option>
-                  </select>
-                </label>
                 <label className="row">
                   <input
                     type="checkbox"
-                    checked={aiBookHint}
+                    checked={aiBookAuto}
                     onChange={(e) => {
-                      setAiBookHint(e.target.checked)
+                      setAiBookAuto(e.target.checked)
                       setPreferredUci(null)
                     }}
                   />
-                  谱着提示
+                  自动匹配开局谱
                 </label>
-                {aiBookHint ? (
-                  <>
-                    <label className="row">
-                      <input
-                        type="checkbox"
-                        checked={aiBookAuto}
-                        onChange={(e) => {
-                          setAiBookAuto(e.target.checked)
-                          setPreferredUci(null)
-                        }}
-                      />
-                      自动匹配开局谱
-                    </label>
-                    {!aiBookAuto ? (
-                      <label className="row">
-                        跟谱
-                        <select
-                          value={aiBookLineId}
-                          onChange={(e) => {
-                            setAiBookLineId(e.target.value)
-                            setPreferredUci(null)
-                          }}
-                        >
-                          {listStudyLines('opening').map((l) => (
-                            <option key={l.id} value={l.id}>
-                              {l.title}
-                            </option>
-                          ))}
-                        </select>
-                      </label>
-                    ) : null}
-                    {aiBookAuto ? (
-                      <p className="hint">
-                        {aiHintLine
-                          ? `已匹配：${aiHintLine.title}`
-                          : '未匹配到开局谱（已离谱或尚未形成谱形）'}
-                      </p>
-                    ) : null}
-                  </>
+                {!aiBookAuto ? (
+                  <label className="row">
+                    跟谱
+                    <select
+                      value={aiBookLineId}
+                      onChange={(e) => {
+                        setAiBookLineId(e.target.value)
+                        setPreferredUci(null)
+                      }}
+                    >
+                      {listStudyLines('opening').map((l) => (
+                        <option key={l.id} value={l.id}>
+                          {l.title}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+                ) : null}
+                {aiBookAuto ? (
+                  <p className="hint">
+                    {aiHintLine
+                      ? `已匹配：${aiHintLine.title}`
+                      : '未匹配到开局谱（已离谱或尚未形成谱形）'}
+                  </p>
                 ) : null}
               </>
             ) : null}
           </section>
+          ) : null}
 
           {mode === 'ai' && aiBookHint ? (
-            <section className="panel-dup-book">
+            <section className="panel-dup-book panel-book-grow">
               <h2>谱上着法</h2>
               {!aiHintLine ? (
                 <p className="hint">请选手选开局谱，或走出可匹配的开局。</p>
@@ -1262,7 +1282,7 @@ export default function App() {
           ) : null}
 
           {mode === 'coach' && !coachLine ? (
-            <section>
+            <section className="panel-book-grow side-coach-scroll">
               {coachPhase === null ? (
                 <>
                   <h2>陪练 · 选阶段</h2>
@@ -1308,7 +1328,7 @@ export default function App() {
           ) : null}
 
           {mode === 'coach' && coachLine ? (
-            <section>
+            <section className="panel-book-grow side-coach-scroll">
               <h2>
                 <span className="hint">{PHASE_LABEL[coachLine.phase]} · </span>
                 {coachLine.title}
@@ -1392,6 +1412,7 @@ export default function App() {
           ) : null}
 
           {mode === 'study' ? (
+            <div className="panel-book-grow">
             <StudyPanel
               opening={studyOpening}
               studySide={studySide}
@@ -1425,12 +1446,13 @@ export default function App() {
               }
               opponentTurn={studyOpponentTurn}
             />
+            </div>
           ) : null}
           </div>
 
           <section className="panel-ops">
             <h2>操作</h2>
-            <div className="btn-row">
+            <div className="btn-row panel-ops-row">
               <button
                 type="button"
                 disabled={
@@ -1504,49 +1526,45 @@ export default function App() {
                   >
                     再来一局
                   </button>
+                  {!snap.drawOfferBy ? (
+                    <button
+                      type="button"
+                      disabled={!!snap.result || !!anim}
+                      onClick={() => {
+                        game.offerDraw(snap.sideToMove)
+                        refresh()
+                      }}
+                    >
+                      提议和棋
+                    </button>
+                  ) : (
+                    <>
+                      <span>{sideName(snap.drawOfferBy)}提议和棋</span>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const other =
+                            snap.drawOfferBy === 'red' ? 'black' : 'red'
+                          game.acceptDraw(other)
+                          refresh()
+                        }}
+                      >
+                        同意
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          game.declineDraw()
+                          refresh()
+                        }}
+                      >
+                        拒绝
+                      </button>
+                    </>
+                  )}
                 </>
               ) : null}
             </div>
-            {mode !== 'study' ? (
-              <div className="btn-row">
-                {!snap.drawOfferBy ? (
-                  <button
-                    type="button"
-                    disabled={!!snap.result || !!anim}
-                    onClick={() => {
-                      game.offerDraw(snap.sideToMove)
-                      refresh()
-                    }}
-                  >
-                    提议和棋
-                  </button>
-                ) : (
-                  <>
-                    <span>{sideName(snap.drawOfferBy)}提议和棋</span>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        const other =
-                          snap.drawOfferBy === 'red' ? 'black' : 'red'
-                        game.acceptDraw(other)
-                        refresh()
-                      }}
-                    >
-                      同意
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        game.declineDraw()
-                        refresh()
-                      }}
-                    >
-                      拒绝
-                    </button>
-                  </>
-                )}
-              </div>
-            ) : null}
           </section>
 
           {exportOpen &&
@@ -1564,7 +1582,8 @@ export default function App() {
           ) : null}
           </div>
         </aside>
-      </main>
+
+      </div>
     </div>
   )
 }
