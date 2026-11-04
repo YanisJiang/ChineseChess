@@ -237,6 +237,17 @@ export function inCheck(board: (Piece | null)[], side: Side): boolean {
   return isSquareAttackedBy(board, king, opp)
 }
 
+/** 不能把子走到对方将/帅格（伪合法着仍可「攻击」将位，供将军检测） */
+function isEnemyKingSquare(
+  board: (Piece | null)[],
+  to: Square,
+  side: Side,
+): boolean {
+  const target = board[to]
+  if (!target) return false
+  return pieceType(target) === 'K' && sideOf(target) !== side
+}
+
 export function generateLegalMoves(
   board: (Piece | null)[],
   side: Side,
@@ -246,6 +257,7 @@ export function generateLegalMoves(
     const p = board[from]
     if (!p || sideOf(p) !== side) continue
     for (const m of generatePseudoMovesForSquare(board, from)) {
+      if (isEnemyKingSquare(board, m.to, side)) continue
       const next = applyMoveOnBoard(board, m.from, m.to)
       if (!inCheck(next, side)) legal.push(m)
     }
@@ -261,6 +273,7 @@ export function generateLegalMovesFrom(
   const p = board[from]
   if (!p || sideOf(p) !== side) return []
   return generatePseudoMovesForSquare(board, from).filter((m) => {
+    if (isEnemyKingSquare(board, m.to, side)) return false
     const next = applyMoveOnBoard(board, m.from, m.to)
     return !inCheck(next, side)
   })
