@@ -46,7 +46,8 @@ describe('nearBook', () => {
       const [a, b] = step.split('-')
       board = applyMoveOnBoard(board, coordToSquare(a!)!, coordToSquare(b!)!)
     }
-    const entries = findOneMoveEntries(board, 'red', index, { limit: 8 })
+    // 扩谱后同局面一手进谱候选增多，抬高 limit 仍应能跨到三步虎
+    const entries = findOneMoveEntries(board, 'red', index, { limit: 16 })
     const cross = entries.filter((e) => e.line.id !== 'zhongpao-pingfeng')
     expect(cross.some((e) => e.line.id === 'sanbuhu' && e.uci === 'h0-g2')).toBe(
       true,
