@@ -5,7 +5,7 @@ import {
   moveToCoord,
   opponent,
 } from './board'
-import { boardToFen, parseFen } from './fen'
+import { boardToFen, parseFen, startingFen } from './fen'
 import { generateLegalMoves, generateLegalMovesFrom, inCheck } from './moves'
 import type { GameResult, GameSnapshot, Move, Piece, Side, Square } from './types'
 
@@ -17,10 +17,13 @@ export class Game {
   private sideHistory: Side[] = []
   private result: GameResult | null = null
   private drawOfferBy: Side | null = null
+  /** 本局起始局面（标准开局或 loadFen 时的局面） */
+  private startFen: string = startingFen()
 
   constructor() {
     this.board = createInitialBoard()
     this.sideToMove = 'red'
+    this.startFen = startingFen()
   }
 
   static fromFen(fen: string): Game {
@@ -33,8 +36,13 @@ export class Game {
     g.sideHistory = []
     g.result = null
     g.drawOfferBy = null
+    g.startFen = boardToFen(board, sideToMove)
     g.refreshResult()
     return g
+  }
+
+  getStartFen(): string {
+    return this.startFen
   }
 
   snapshot(): GameSnapshot {
@@ -104,6 +112,7 @@ export class Game {
     return this.boardHistory.length > 0 && this.result === null
   }
 
+  /** 单撤最后一手（内部/测试用） */
   undo(): boolean {
     if (this.result !== null) return false
     if (this.boardHistory.length === 0) return false
@@ -112,6 +121,31 @@ export class Game {
     this.history.pop()
     this.drawOfferBy = null
     this.result = null
+    return true
+  }
+
+  /**
+   * 撤回 side 自己的上一手。
+   * 若对方已应着，则连撤「对方应着 + side 上一手」。
+   */
+  canUndoFor(side: Side): boolean {
+    if (this.result !== null) return false
+    const n = this.history.length
+    if (n === 0) return false
+    const lastMover = this.sideHistory[n - 1]!
+    if (lastMover === side) return true
+    if (n >= 2 && this.sideHistory[n - 2] === side) return true
+    return false
+  }
+
+  undoFor(side: Side): boolean {
+    if (!this.canUndoFor(side)) return false
+    const n = this.history.length
+    const lastMover = this.sideHistory[n - 1]!
+    const steps = lastMover === side ? 1 : 2
+    for (let i = 0; i < steps; i++) {
+      if (!this.undo()) return false
+    }
     return true
   }
 
@@ -151,6 +185,7 @@ export class Game {
     this.sideHistory = []
     this.result = null
     this.drawOfferBy = null
+    this.startFen = startingFen()
   }
 
   loadFen(fen: string): void {
@@ -162,6 +197,7 @@ export class Game {
     this.sideHistory = []
     this.drawOfferBy = null
     this.result = null
+    this.startFen = boardToFen(board, sideToMove)
     this.refreshResult()
   }
 
