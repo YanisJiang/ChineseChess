@@ -106,6 +106,9 @@ export default function App() {
   const coachGen = useRef(0)
   const workerRef = useRef<Worker | null>(null)
   const animRef = useRef<FlyAnim | null>(null)
+  const movesStripRef = useRef<HTMLOListElement>(null)
+  const [narrowLayout, setNarrowLayout] = useState(false)
+  const [panelMoreOpen, setPanelMoreOpen] = useState(false)
 
   const refresh = useCallback(() => setTick((t) => t + 1), [])
 
@@ -138,10 +141,26 @@ export default function App() {
     }
   }, [])
 
+  useEffect(() => {
+    // 竖屏窄宽，或横屏矮视口（手机横持常 >720px 宽）
+    const mq = window.matchMedia(
+      '(max-width: 720px), (orientation: landscape) and (max-height: 520px) and (max-width: 900px)',
+    )
+    const sync = () => setNarrowLayout(mq.matches)
+    sync()
+    mq.addEventListener('change', sync)
+    return () => mq.removeEventListener('change', sync)
+  }, [])
+
   const snap = useMemo(() => {
     void tick
     return game.snapshot()
   }, [game, tick])
+
+  useEffect(() => {
+    const el = movesStripRef.current
+    if (el) el.scrollTop = el.scrollHeight
+  }, [snap.moveHistory.length, narrowLayout])
 
   const studyOpening = studyOpeningId
     ? (getStudyLine(studyOpeningId) ?? null)
@@ -792,7 +811,254 @@ export default function App() {
           disabled={!!snap.result || !humanTurn}
         />
 
+        <aside className="play-strip" aria-label="谱着与着法">
+          <div className="play-strip-book">
+            {mode === 'coach' && coachLine ? (
+              <>
+                <h2>
+                  <span className="hint">{PHASE_LABEL[coachLine.phase]} · </span>
+                  {coachLine.title}
+                </h2>
+                {!coachOnBook ? (
+                  <p className="hint">已离开本谱</p>
+                ) : null}
+                {coachOnBook && coachBranches.length > 0 ? (
+                  <>
+                    <h3>
+                      {snap.sideToMove === coachSide ? '你的着法' : '对方着法'}
+                    </h3>
+                    <ul className="study-branches study-branches-compact">
+                      {coachBranches.map((b) => (
+                        <li key={b.uci}>
+                          <button
+                            type="button"
+                            className={preferredUci === b.uci ? 'active' : ''}
+                            onClick={() => {
+                              if (humanTurn) chooseBranch(b.uci)
+                              else {
+                                setPreferredUci(b.uci)
+                                setCoachTransfer(null)
+                              }
+                            }}
+                          >
+                            {b.main ? '【主】' : ''}
+                            {formatBookMove(b)}
+                            <span className="hint"> · {b.benefit}</span>
+                          </button>
+                        </li>
+                      ))}
+                    </ul>
+                  </>
+                ) : coachOnBook ? (
+                  <p className="hint">本线谱着已走完</p>
+                ) : null}
+                {coachNearEntries.length > 0 ? (
+                  <>
+                    <h3>可转入</h3>
+                    <ul className="study-branches study-branches-compact">
+                      {coachNearEntries.map((e) => (
+                        <li key={`${e.line.id}-${e.uci}`}>
+                          <button
+                            type="button"
+                            className={
+                              coachTransfer?.lineId === e.line.id &&
+                              coachTransfer.uci === e.uci
+                                ? 'active'
+                                : preferredUci === e.uci
+                                  ? 'active'
+                                  : ''
+                            }
+                            onClick={() =>
+                              selectCoachCrossEntry(e.uci, e.line.id)
+                            }
+                          >
+                            {e.label} →《{e.line.title}》
+                          </button>
+                        </li>
+                      ))}
+                    </ul>
+                  </>
+                ) : null}
+              </>
+            ) : null}
+
+            {mode === 'study' && studyOpening ? (
+              <>
+                <h2>
+                  <span className="hint">
+                    {PHASE_LABEL[studyOpening.phase]} ·{' '}
+                  </span>
+                  {studyOpening.title}
+                </h2>
+                {!studyOnBook ? (
+                  <p className="hint">已离开本谱</p>
+                ) : null}
+                {studyOnBook && studyBranches.length > 0 ? (
+                  <>
+                    <h3>
+                      {studyOpponentTurn ? '对方着法' : '你的着法'}
+                    </h3>
+                    <ul className="study-branches study-branches-compact">
+                      {studyBranches.map((b) => (
+                        <li key={b.uci}>
+                          <button
+                            type="button"
+                            className={preferredUci === b.uci ? 'active' : ''}
+                            onClick={() => chooseBranch(b.uci)}
+                          >
+                            {b.main ? '【主】' : ''}
+                            {formatBookMove(b)}
+                            <span className="hint"> · {b.benefit}</span>
+                          </button>
+                        </li>
+                      ))}
+                    </ul>
+                  </>
+                ) : studyOnBook ? (
+                  <p className="hint">本线谱着已走完</p>
+                ) : null}
+              </>
+            ) : null}
+
+            {mode === 'ai' && aiBookHint ? (
+              <>
+                <h2>谱上着法</h2>
+                {!aiHintLine ? (
+                  <p className="hint">未匹配开局谱</p>
+                ) : !aiHintOnBook ? (
+                  <p className="hint">已离开本谱</p>
+                ) : aiHintBranches.length > 0 ? (
+                  <ul className="study-branches study-branches-compact">
+                    {aiHintBranches.map((b) => (
+                      <li key={b.uci}>
+                        <button
+                          type="button"
+                          className={preferredUci === b.uci ? 'active' : ''}
+                          onClick={() => setPreferredUci(b.uci)}
+                        >
+                          {b.main ? '【主】' : ''}
+                          {formatBookMove(b)}
+                          <span className="hint"> · {b.benefit}</span>
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
+                ) : (
+                  <p className="hint">本线谱着已走完</p>
+                )}
+              </>
+            ) : null}
+
+            {mode === 'coach' && !coachLine ? (
+              <p className="hint">陪练：在「更多」里选课</p>
+            ) : null}
+            {mode === 'study' && !studyOpening ? (
+              <p className="hint">学棋：在「更多」里选课</p>
+            ) : null}
+            {mode === 'hotseat' || (mode === 'ai' && !aiBookHint) ? (
+              <p className="hint">对局中 · 着法见下方</p>
+            ) : null}
+          </div>
+
+          <div className="play-strip-moves">
+            <h2>走子</h2>
+            <ol className="moves moves-strip" ref={movesStripRef}>
+              {game.getMoveHistoryCoords().map((c, i) => (
+                <li key={`strip-${c}-${i}`}>
+                  {i % 2 === 0 ? '红' : '黑'} {c}
+                </li>
+              ))}
+            </ol>
+          </div>
+        </aside>
+
         <aside className="panel">
+          {narrowLayout ? (
+            <button
+              type="button"
+              className="panel-more-toggle"
+              onClick={() => setPanelMoreOpen((o) => !o)}
+            >
+              {panelMoreOpen ? '收起设置' : '更多 · 模式与设置'}
+            </button>
+          ) : null}
+          <div
+            className={
+              narrowLayout && !panelMoreOpen
+                ? 'panel-body panel-body-hidden'
+                : 'panel-body'
+            }
+          >
+          <div className="panel-top">
+            {mode !== 'study' ? (
+              <section className="panel-fen">
+                <h2>局面串</h2>
+                <textarea
+                  value={fenInput || game.toFen()}
+                  onChange={(e) => setFenInput(e.target.value)}
+                  onFocus={() => setFenInput(game.toFen())}
+                  rows={3}
+                />
+                <div className="btn-row">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      navigator.clipboard?.writeText(game.toFen())
+                      setMessage('已复制局面串')
+                    }}
+                  >
+                    复制
+                  </button>
+                  <button
+                    type="button"
+                    disabled={!!anim || thinking}
+                    onClick={() => {
+                      try {
+                        bumpAiGen()
+                        clearAnim()
+                        game.loadFen(fenInput.trim() || game.toFen())
+                        setSelected(null)
+                        setLastCaptureTo(null)
+                        setMessage('已导入局面')
+                        setFenInput('')
+                        refresh()
+                      } catch (e) {
+                        setMessage(e instanceof Error ? e.message : '导入失败')
+                      }
+                    }}
+                  >
+                    导入
+                  </button>
+                </div>
+                {selected !== null ? (
+                  <p className="hint">选中：{squareToCoord(selected)}</p>
+                ) : null}
+              </section>
+            ) : null}
+            <section className="panel-moves">
+              <h2>走子</h2>
+              <ol className="moves panel-dup-moves">
+                {game.getMoveHistoryCoords().map((c, i) => (
+                  <li key={`${c}-${i}`}>
+                    {i % 2 === 0 ? '红' : '黑'} {c}
+                  </li>
+                ))}
+              </ol>
+              {mode === 'hotseat' || mode === 'ai' || mode === 'coach' ? (
+                <div className="btn-row">
+                  <button
+                    type="button"
+                    disabled={snap.moveHistory.length === 0}
+                    onClick={() => setExportOpen(true)}
+                  >
+                    导出棋谱
+                  </button>
+                </div>
+              ) : null}
+            </section>
+          </div>
+
+          <div className="panel-mid">
           <section>
             <h2>模式</h2>
             <label className="row">
@@ -961,7 +1227,7 @@ export default function App() {
           </section>
 
           {mode === 'ai' && aiBookHint ? (
-            <section>
+            <section className="panel-dup-book">
               <h2>谱上着法</h2>
               {!aiHintLine ? (
                 <p className="hint">请选手选开局谱，或走出可匹配的开局。</p>
@@ -1056,6 +1322,7 @@ export default function App() {
               {coachOnBook && coachResolve?.node.comment ? (
                 <p className="study-note">{coachResolve.node.comment}</p>
               ) : null}
+              <div className="panel-dup-book">
               {coachOnBook && coachBranches.length > 0 ? (
                 <>
                   <h3>
@@ -1120,6 +1387,7 @@ export default function App() {
                   </ul>
                 </>
               ) : null}
+              </div>
             </section>
           ) : null}
 
@@ -1158,8 +1426,9 @@ export default function App() {
               opponentTurn={studyOpponentTurn}
             />
           ) : null}
+          </div>
 
-          <section>
+          <section className="panel-ops">
             <h2>操作</h2>
             <div className="btn-row">
               <button
@@ -1280,28 +1549,6 @@ export default function App() {
             ) : null}
           </section>
 
-          <section>
-            <h2>走子</h2>
-            <ol className="moves">
-              {game.getMoveHistoryCoords().map((c, i) => (
-                <li key={`${c}-${i}`}>
-                  {i % 2 === 0 ? '红' : '黑'} {c}
-                </li>
-              ))}
-            </ol>
-            {mode === 'hotseat' || mode === 'ai' || mode === 'coach' ? (
-              <div className="btn-row">
-                <button
-                  type="button"
-                  disabled={snap.moveHistory.length === 0}
-                  onClick={() => setExportOpen(true)}
-                >
-                  导出棋谱
-                </button>
-              </div>
-            ) : null}
-          </section>
-
           {exportOpen &&
           (mode === 'hotseat' || mode === 'ai' || mode === 'coach') ? (
             <ExportPanel
@@ -1315,52 +1562,7 @@ export default function App() {
               onCopied={setMessage}
             />
           ) : null}
-
-          {mode !== 'study' ? (
-            <section>
-              <h2>局面串</h2>
-              <textarea
-                value={fenInput || game.toFen()}
-                onChange={(e) => setFenInput(e.target.value)}
-                onFocus={() => setFenInput(game.toFen())}
-                rows={3}
-              />
-              <div className="btn-row">
-                <button
-                  type="button"
-                  onClick={() => {
-                    navigator.clipboard?.writeText(game.toFen())
-                    setMessage('已复制局面串')
-                  }}
-                >
-                  复制
-                </button>
-                <button
-                  type="button"
-                  disabled={!!anim || thinking}
-                  onClick={() => {
-                    try {
-                      bumpAiGen()
-                      clearAnim()
-                      game.loadFen(fenInput.trim() || game.toFen())
-                      setSelected(null)
-                      setLastCaptureTo(null)
-                      setMessage('已导入局面')
-                      setFenInput('')
-                      refresh()
-                    } catch (e) {
-                      setMessage(e instanceof Error ? e.message : '导入失败')
-                    }
-                  }}
-                >
-                  导入
-                </button>
-              </div>
-              {selected !== null ? (
-                <p className="hint">选中：{squareToCoord(selected)}</p>
-              ) : null}
-            </section>
-          ) : null}
+          </div>
         </aside>
       </main>
     </div>

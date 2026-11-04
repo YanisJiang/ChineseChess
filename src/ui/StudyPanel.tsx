@@ -139,7 +139,7 @@ export function StudyPanel({
       {onBook && nodeComment ? <p className="study-note">{nodeComment}</p> : null}
 
       {onBook && branches.length > 0 ? (
-        <>
+        <div className="panel-dup-book">
           <h3>{opponentTurn ? '对方着法' : '你的着法'}</h3>
           <p className="hint">
             点变招即走该步
@@ -161,7 +161,7 @@ export function StudyPanel({
               </li>
             ))}
           </ul>
-        </>
+        </div>
       ) : null}
 
       {completed ? (
