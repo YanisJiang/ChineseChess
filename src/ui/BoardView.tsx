@@ -1,14 +1,33 @@
-import type { ReactNode } from 'react'
+import { useEffect, useRef, useState, type ReactNode } from 'react'
+import { fileOf, rankOf } from '../engine/board'
 import type { Move, Piece, Square } from '../engine/types'
 import { pieceLabel } from './pieceLabel'
+
+export type FlyAnim = {
+  from: Square
+  to: Square
+  piece: Piece
+  capturing: boolean
+}
 
 interface Props {
   board: (Piece | null)[]
   selected: Square | null
   targets: Set<Square>
   lastMove: Move | null
+  lastCaptureTo: Square | null
+  checkKing: Square | null
+  anim: FlyAnim | null
+  onAnimComplete: () => void
   onSquareClick: (sq: Square) => void
   disabled?: boolean
+}
+
+function pointStyle(s: Square): { left: string; top: string } {
+  return {
+    left: `${(fileOf(s) / 8) * 100}%`,
+    top: `${((9 - rankOf(s)) / 9) * 100}%`,
+  }
 }
 
 /** SVG：file→x，rank9 在上 → y=0；格点在线网交点 */
@@ -29,7 +48,6 @@ function BoardLines() {
       <g className="board-grid">
         {hors}
         {verts}
-        {/* 九宫斜线：黑方 y0–2，红方 y7–9 */}
         <line x1={3} y1={0} x2={5} y2={2} />
         <line x1={5} y1={0} x2={3} y2={2} />
         <line x1={3} y1={7} x2={5} y2={9} />
@@ -45,11 +63,66 @@ function BoardLines() {
   )
 }
 
+function Flyer({
+  anim,
+  onAnimComplete,
+}: {
+  anim: FlyAnim
+  onAnimComplete: () => void
+}) {
+  const [atDest, setAtDest] = useState(false)
+  const doneRef = useRef(false)
+
+  useEffect(() => {
+    doneRef.current = false
+    setAtDest(false)
+    const id = requestAnimationFrame(() => {
+      requestAnimationFrame(() => setAtDest(true))
+    })
+    // 纯纵/横/斜都靠超时兜底，避免某一轴向未变化时 transitionend 不来
+    const fallback = window.setTimeout(() => {
+      if (doneRef.current) return
+      doneRef.current = true
+      onAnimComplete()
+    }, 320)
+    return () => {
+      cancelAnimationFrame(id)
+      window.clearTimeout(fallback)
+    }
+  }, [anim.from, anim.to, anim.piece, onAnimComplete])
+
+  const pos = pointStyle(atDest ? anim.to : anim.from)
+
+  const finish = () => {
+    if (doneRef.current) return
+    doneRef.current = true
+    onAnimComplete()
+  }
+
+  return (
+    <div
+      className={`flyer ${anim.piece === anim.piece.toUpperCase() ? 'red' : 'black'}${anim.capturing ? ' flyer-capture' : ''}`}
+      style={pos}
+      onTransitionEnd={(e) => {
+        if (e.propertyName === 'left' || e.propertyName === 'top') finish()
+      }}
+    >
+      <span className={`piece ${anim.piece === anim.piece.toUpperCase() ? 'red' : 'black'}`}>
+        {pieceLabel(anim.piece)}
+      </span>
+    </div>
+  )
+}
+
 export function BoardView({
   board,
   selected,
   targets,
   lastMove,
+  lastCaptureTo,
+  checkKing,
+  anim,
+  onAnimComplete,
   onSquareClick,
   disabled,
 }: Props) {
@@ -62,8 +135,9 @@ export function BoardView({
       const isTarget = targets.has(s)
       const isFrom = lastMove?.from === s
       const isTo = lastMove?.to === s
-      const left = `${(file / 8) * 100}%`
-      const top = `${((9 - rank) / 9) * 100}%`
+      const isCaptureFlash = lastCaptureTo === s
+      const isCheck = checkKing === s
+      const { left, top } = pointStyle(s)
 
       points.push(
         <button
@@ -75,6 +149,8 @@ export function BoardView({
             isTarget ? 'point-target' : '',
             isFrom ? 'point-last-from' : '',
             isTo ? 'point-last-to' : '',
+            isCaptureFlash ? 'point-capture' : '',
+            isCheck ? 'point-check' : '',
           ]
             .filter(Boolean)
             .join(' ')}
@@ -102,6 +178,7 @@ export function BoardView({
       <div className="board-frame">
         <BoardLines />
         <div className="point-layer">{points}</div>
+        {anim ? <Flyer anim={anim} onAnimComplete={onAnimComplete} /> : null}
       </div>
     </div>
   )
