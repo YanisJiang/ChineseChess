@@ -1,0 +1,15 @@
+---
+description: 代码改完必须打 git 注解标签作回退点；不提交当前分支时也要有游离快照标签。步骤见 Skill lucky-conversation-tag。
+alwaysApply: true
+---
+
+# 改代码要打对话标签
+
+每完成一组可独立回退的代码修改，**必须**有 git **注解标签**回退点。回复里写出标签名 + 短 SHA。禁止写「这轮还没有回退点」。
+
+- 默认：提交当前分支后再打标。
+- 用户说先别提交、或未要求提交：不要 `git commit` 到当前分支，改用游离快照标签。
+- 不要轻量标签、不要 `git tag -f`、不要擅自 `git push` 标签。
+- 不要用 `git stash` 当回退点。
+
+**命名、注解正文、提交打标、不提交时的 `write-tree`/`commit-tree` 脚本：读并执行 Skill `lucky-conversation-tag`。**
