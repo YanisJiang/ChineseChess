@@ -700,7 +700,7 @@ export default function App() {
       if (!studyOnBook) return '已离开本谱'
       if (anim) return '走子中…'
       if (snap.sideToMove !== studySide)
-        return '对方着：请选变招或点「对方走」'
+        return '对方着：点变招即走，或点「对方走」'
       const check = game.isInCheck() ? '（将军）' : ''
       return `跟谱中 · 轮到你${check}`
     }

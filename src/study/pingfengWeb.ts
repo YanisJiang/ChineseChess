@@ -36,12 +36,6 @@ export const PINGFENG_WEB_LINES: StudyLine[] = [
       { uci: 'f9-e8', benefit: '补士固防。' },
     ],
     endComment: '兑马补士完成，可转谱续走。',
-    rootAlts: [
-      {
-        ply: { uci: 'c3-c4', benefit: '不急打兵，先挺七兵扩地。' },
-        endComment: '缓攻变着。',
-      },
-    ],
   }),
   lineFromPath({
     id: 'end-duima-tingbing',
@@ -66,12 +60,6 @@ export const PINGFENG_WEB_LINES: StudyLine[] = [
       { uci: 'i0-h0', benefit: '平车瞄炮，打开后续选择。' },
     ],
     endComment: '平车后黑有多方向可选，注意转谱。',
-    rootAlts: [
-      {
-        ply: { uci: 'g2-e3', benefit: '也可跳盘头马争中。' },
-        endComment: '盘马变着。',
-      },
-    ],
   }),
   /** 枢纽：平炮压马 / 边炮短计划，不走无计划下卒送吃 */
   lineFromPath({

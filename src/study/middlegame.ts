@@ -83,12 +83,6 @@ export const MIDDLEGAME_LINES: StudyLine[] = [
             ],
           },
         },
-        {
-          uci: 'g3-g4',
-          label: '兵三进一',
-          benefit: '也可先挺兵再出车。',
-          next: end(),
-        },
       ],
     },
   },
@@ -149,12 +143,6 @@ export const MIDDLEGAME_LINES: StudyLine[] = [
             ],
           },
         },
-        {
-          uci: 'i0-i1',
-          label: '车一进一',
-          benefit: '也可先起横车。',
-          next: end(),
-        },
       ],
     },
   },
@@ -195,12 +183,6 @@ export const MIDDLEGAME_LINES: StudyLine[] = [
             ],
           },
         },
-        {
-          uci: 'i0-h0',
-          label: '车一平二',
-          benefit: '也可先平车瞄炮。',
-          next: end(),
-        },
       ],
     },
   },
@@ -213,7 +195,7 @@ export const MIDDLEGAME_LINES: StudyLine[] = [
     startFen:
       'r1bakab1r/9/2n1c1nc1/p1p1p1p1p/9/9/P1P1P1P1P/1CN1C1N2/9/R1BAKAB1R w',
     root: {
-      comment: '列手炮双方马已出。红可起横车或挺中兵。',
+      comment: '列手炮双方马已出。红起横车占肋。',
       moves: [
         {
           uci: 'i0-i1',
@@ -241,12 +223,6 @@ export const MIDDLEGAME_LINES: StudyLine[] = [
               },
             ],
           },
-        },
-        {
-          uci: 'e3-e4',
-          label: '兵五进一',
-          benefit: '也可先挺中兵对攻。',
-          next: end(),
         },
       ],
     },
@@ -288,12 +264,6 @@ export const MIDDLEGAME_LINES: StudyLine[] = [
             ],
           },
         },
-        {
-          uci: 'h0-g2',
-          label: '马二进三',
-          benefit: '也可先出右马。',
-          next: end(),
-        },
       ],
     },
   },
@@ -306,7 +276,7 @@ export const MIDDLEGAME_LINES: StudyLine[] = [
     startFen:
       'rnbakab1r/9/1c4nc1/p1p1p3p/6p2/9/P1P1P1P1P/1CN1B2C1/9/R1BAKA1NR w',
     root: {
-      comment: '飞相后双方出马。红可跳右马或挺兵。',
+      comment: '飞相后双方出马。红跳右马再挺兵。',
       moves: [
         {
           uci: 'h0-g2',
@@ -334,12 +304,6 @@ export const MIDDLEGAME_LINES: StudyLine[] = [
               },
             ],
           },
-        },
-        {
-          uci: 'g3-g4',
-          label: '兵三进一',
-          benefit: '也可先挺兵。',
-          next: end(),
         },
       ],
     },

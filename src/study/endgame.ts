@@ -25,10 +25,10 @@ export const ENDGAME_LINES: StudyLine[] = [
           next: {
             moves: [
               {
-                      uci: 'c7-b9',
-                      main: true,
-                      label: '马3退2',
-                      benefit: '退马暂避。',
+                uci: 'c7-b9',
+                main: true,
+                label: '马3退2',
+                benefit: '退马暂避。',
                 next: {
                   moves: [
                     {
@@ -44,12 +44,6 @@ export const ENDGAME_LINES: StudyLine[] = [
             ],
           },
         },
-        {
-          uci: 'e3-e4',
-          label: '兵五进一',
-          benefit: '也可先挺中兵。',
-          next: end(),
-        },
       ],
     },
   },
@@ -61,7 +55,7 @@ export const ENDGAME_LINES: StudyLine[] = [
     startFen:
       'rnbak1b1r/4a4/1c2c1n2/p1p1p3p/6p2/9/P1P1P1P1P/1CN1C4/3R5/R1BAKABN1 w',
     root: {
-      comment: '肋车在位。可打中兵或出马。',
+      comment: '肋车在位。打中兵转入残局争夺。',
       moves: [
         {
           uci: 'e2-e6',
@@ -89,12 +83,6 @@ export const ENDGAME_LINES: StudyLine[] = [
               },
             ],
           },
-        },
-        {
-          uci: 'h0-g2',
-          label: '马二进三',
-          benefit: '也可先出马。',
-          next: end(),
         },
       ],
     },
@@ -136,12 +124,6 @@ export const ENDGAME_LINES: StudyLine[] = [
             ],
           },
         },
-        {
-          uci: 'i0-i1',
-          label: '车一进一',
-          benefit: '也可先起横车。',
-          next: end(),
-        },
       ],
     },
   },
@@ -181,12 +163,6 @@ export const ENDGAME_LINES: StudyLine[] = [
               },
             ],
           },
-        },
-        {
-          uci: 'h0-g2',
-          label: '马二进三',
-          benefit: '也可先出右马。',
-          next: end(),
         },
       ],
     },
@@ -228,12 +204,6 @@ export const ENDGAME_LINES: StudyLine[] = [
             ],
           },
         },
-        {
-          uci: 'g3-g4',
-          label: '兵三进一',
-          benefit: '也可先挺兵。',
-          next: end(),
-        },
       ],
     },
   },
@@ -268,23 +238,11 @@ export const ENDGAME_LINES: StudyLine[] = [
                       benefit: '跟将平车，继续控制将门。',
                       next: end('车控将门入门完成。'),
                     },
-                    {
-                      uci: 'e1-e8',
-                      label: '车五进七',
-                      benefit: '也可进车贴将紧逼。',
-                      next: end(),
-                    },
                   ],
                 },
               },
             ],
           },
-        },
-        {
-          uci: 'd1-d2',
-          label: '车六进一',
-          benefit: '也可先抬车再攻。',
-          next: end(),
         },
       ],
     },
