@@ -24,11 +24,16 @@ export interface Move {
   to: Square
 }
 
+/** 和棋原因：协议 / 三次重复 / 自然限着 */
+export type DrawReason = 'agreement' | 'repetition' | 'natural'
+
 export type GameResult =
   | { kind: 'checkmate'; winner: Side }
   | { kind: 'stalemate'; winner: Side }
   | { kind: 'resign'; winner: Side }
-  | { kind: 'draw' }
+  /** 长将：循环内某方着着将军 → 对方胜 */
+  | { kind: 'perpetualCheck'; winner: Side }
+  | { kind: 'draw'; reason?: DrawReason }
 
 export interface GameSnapshot {
   board: (Piece | null)[]
