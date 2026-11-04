@@ -51,6 +51,36 @@ describe('悔棋与认输和棋', () => {
     expect(g.getBoard()[sq(0, 3)]).toBe('P')
   })
 
+  it('undoFor：对方应着后悔棋回到己方走前', () => {
+    const g = new Game()
+    expect(g.tryMove(sq(0, 3), sq(0, 4))).toBe(true) // 红
+    expect(g.tryMove(sq(0, 6), sq(0, 5))).toBe(true) // 黑应
+    expect(g.getSideToMove()).toBe('red')
+    expect(g.canUndoFor('red')).toBe(true)
+    expect(g.undoFor('red')).toBe(true)
+    expect(g.getSideToMove()).toBe('red')
+    expect(g.getBoard()[sq(0, 3)]).toBe('P')
+    expect(g.getBoard()[sq(0, 4)]).toBeNull()
+    expect(g.getBoard()[sq(0, 6)]).toBe('p')
+    expect(g.getMoveHistoryCoords()).toEqual([])
+  })
+
+  it('undoFor：刚走完尚未应着时只撤一手', () => {
+    const g = new Game()
+    g.tryMove(sq(7, 2), sq(4, 2)) // 红炮
+    expect(g.getSideToMove()).toBe('black')
+    expect(g.undoFor('red')).toBe(true)
+    expect(g.getSideToMove()).toBe('red')
+    expect(g.getBoard()[sq(7, 2)]).toBe('C')
+  })
+
+  it('undoFor：尚未下过不可悔', () => {
+    const g = new Game()
+    g.tryMove(sq(0, 3), sq(0, 4))
+    expect(g.canUndoFor('black')).toBe(false)
+    expect(g.undoFor('black')).toBe(false)
+  })
+
   it('认输结束', () => {
     const g = new Game()
     g.resign('red')
