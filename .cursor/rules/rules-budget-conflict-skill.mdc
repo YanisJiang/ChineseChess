@@ -1,0 +1,16 @@
+---
+description: alwaysApply 只留短硬句；加改规则与冲突须人确认；Plan 短复述；Skill 点名命中。
+alwaysApply: true
+---
+
+# 规则预算、冲突与 Skill 命中
+
+硬门槛样例（不在此展开）：`minimize-change-disclose-blast`、`ui-node-path-no-guess`、`feature-then-test` + `lucky-autotest-layer`。
+
+1. **薄常驻**：alwaysApply 只留短硬句；细则/正反例/路径表进 **Skill**。一条关注点一份规则；只引用不复制正文。
+2. **新门槛**：先评估并入已有短规则；确属新关注点且用户未点名文件才新建（`align-rules-before-edit`）。
+3. **加/改/废止规则或消冲突**：必须 Plan + 人确认；**禁止**私下加规、私下消冲突、私下选边。冲突：停 → 点名原文给人裁定。
+4. **15 轮**：按 `reply-concise-diff` 提醒开新对话。
+5. **Plan**：只短勾选本轮门槛/禁区/不改什么；**禁止**贴规则全文；勿为省 token 省略禁区。
+6. **Skill**：`description` 含关键字/何时用/禁用；规则点名必读；Plan 写本轮 Skill → Do 前 Read → 能写出已读名+一条禁区，否则退回。同类一个入口，优先扩已有。
+7. 流水线（比喻非真记忆）：读 Skill → Plan → do → 单测 → Autotest → 回退点；**禁止**把长约定文灌进 alwaysApply。
