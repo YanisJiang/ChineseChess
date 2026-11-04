@@ -51,6 +51,36 @@ describe('悔棋与认输和棋', () => {
     expect(g.getBoard()[sq(0, 3)]).toBe('P')
   })
 
+  it('undoFor：对方应着后悔棋回到己方走前', () => {
+    const g = new Game()
+    expect(g.tryMove(sq(0, 3), sq(0, 4))).toBe(true) // 红
+    expect(g.tryMove(sq(0, 6), sq(0, 5))).toBe(true) // 黑应
+    expect(g.getSideToMove()).toBe('red')
+    expect(g.canUndoFor('red')).toBe(true)
+    expect(g.undoFor('red')).toBe(true)
+    expect(g.getSideToMove()).toBe('red')
+    expect(g.getBoard()[sq(0, 3)]).toBe('P')
+    expect(g.getBoard()[sq(0, 4)]).toBeNull()
+    expect(g.getBoard()[sq(0, 6)]).toBe('p')
+    expect(g.getMoveHistoryCoords()).toEqual([])
+  })
+
+  it('undoFor：刚走完尚未应着时只撤一手', () => {
+    const g = new Game()
+    g.tryMove(sq(7, 2), sq(4, 2)) // 红炮
+    expect(g.getSideToMove()).toBe('black')
+    expect(g.undoFor('red')).toBe(true)
+    expect(g.getSideToMove()).toBe('red')
+    expect(g.getBoard()[sq(7, 2)]).toBe('C')
+  })
+
+  it('undoFor：尚未下过不可悔', () => {
+    const g = new Game()
+    g.tryMove(sq(0, 3), sq(0, 4))
+    expect(g.canUndoFor('black')).toBe(false)
+    expect(g.undoFor('black')).toBe(false)
+  })
+
   it('认输结束', () => {
     const g = new Game()
     g.resign('red')
@@ -68,6 +98,18 @@ describe('悔棋与认输和棋', () => {
 })
 
 describe('将军与将死困毙', () => {
+  it('合法着不得吃将：车将同线空旷仍不算吃将着', () => {
+    const fen = '4k4/9/9/9/9/9/9/9/4R4/4K4 w'
+    const g = Game.fromFen(fen)
+    expect(inCheck(g.getBoard(), 'black')).toBe(true)
+    const legal = generateLegalMoves(g.getBoard(), 'red')
+    expect(legal.some((m) => m.from === sq(4, 1) && m.to === sq(4, 9))).toBe(
+      false,
+    )
+    expect(g.tryMove(sq(4, 1), sq(4, 9))).toBe(false)
+    expect(g.getBoard()[sq(4, 9)]).toBe('k')
+  })
+
   it('将死局面检测', () => {
     // 黑将 e9；红车 a9 控底线；红车 e8 将军；吃车则将帅对面
     const g = Game.fromFen('R3k4/4R4/9/9/9/9/9/9/9/4K4 b')
