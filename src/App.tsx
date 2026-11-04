@@ -1037,7 +1037,6 @@ export default function App() {
           </div>
 
           <div className="play-strip-moves">
-            <h2>走子</h2>
             <ol className="moves moves-strip" ref={movesStripRef}>
               {game.getMoveHistoryCoords().map((c, i) => (
                 <li key={`strip-${c}-${i}`}>
