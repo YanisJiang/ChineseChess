@@ -104,6 +104,7 @@ export class Game {
     return this.boardHistory.length > 0 && this.result === null
   }
 
+  /** 单撤最后一手（内部/测试用） */
   undo(): boolean {
     if (this.result !== null) return false
     if (this.boardHistory.length === 0) return false
@@ -112,6 +113,31 @@ export class Game {
     this.history.pop()
     this.drawOfferBy = null
     this.result = null
+    return true
+  }
+
+  /**
+   * 撤回 side 自己的上一手。
+   * 若对方已应着，则连撤「对方应着 + side 上一手」。
+   */
+  canUndoFor(side: Side): boolean {
+    if (this.result !== null) return false
+    const n = this.history.length
+    if (n === 0) return false
+    const lastMover = this.sideHistory[n - 1]!
+    if (lastMover === side) return true
+    if (n >= 2 && this.sideHistory[n - 2] === side) return true
+    return false
+  }
+
+  undoFor(side: Side): boolean {
+    if (!this.canUndoFor(side)) return false
+    const n = this.history.length
+    const lastMover = this.sideHistory[n - 1]!
+    const steps = lastMover === side ? 1 : 2
+    for (let i = 0; i < steps; i++) {
+      if (!this.undo()) return false
+    }
     return true
   }
 
